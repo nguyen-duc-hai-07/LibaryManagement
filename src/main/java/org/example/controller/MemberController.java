@@ -5,10 +5,7 @@ import org.example.dto.response.MemberResponse;
 import org.example.service.MemberService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,7 +19,7 @@ public class MemberController {
     }
 
     @PostMapping
-    public MemberResponse addMember(MemberRequest request) throws Exception {
+    public MemberResponse addMember(@RequestBody MemberRequest request) throws Exception {
         return memberService.addMember(request);
     }
 

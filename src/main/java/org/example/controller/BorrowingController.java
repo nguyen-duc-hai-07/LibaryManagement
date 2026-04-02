@@ -24,7 +24,7 @@ public class BorrowingController {
     }
 
     @PostMapping("/return")
-    public BorrowingDTO returnBook(BorrowingRequest request) throws Exception {
+    public BorrowingDTO returnBook(@RequestBody BorrowingRequest request) throws Exception {
         return borrowingService.returnBook(request);
     }
     @GetMapping
