@@ -1,6 +1,9 @@
 package org.example.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.dto.request.BorrowingRequest;
+import org.example.exception.BusinessException;
+import org.example.exception.NotFoundException;
 import org.example.service.BorrowingService;
 import org.example.config.DBConnectionPool;
 import org.example.dao.BookDAO;
@@ -16,6 +19,7 @@ import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 public class BorrowingServiceImpl implements BorrowingService {
     private final BorrowingDAO borrowingDAO;
@@ -30,21 +34,24 @@ public class BorrowingServiceImpl implements BorrowingService {
 
     public BorrowingDTO borrowBook(BorrowingRequest request) throws Exception {
         Borrowing borrowing = new Borrowing(request.getMemberId(), request.getBookId());
+        log.info("Borrowing book: {}", borrowing);
         Connection conn = null;
         try {
             conn = pool.getConnection();
-
             Book book = bookDAO.findById(conn , request.getBookId());
             if(book == null) {
-                throw new Exception("Book not found");
+                log.error("Book not found: id = {}", request.getBookId());
+                throw new NotFoundException("Book not found: id = " + request.getBookId());
             }
             Member member = memberDAO.findById(conn , request.getMemberId() );
             if(member == null) {
-                throw new Exception("Member not found");
+                log.error("Member not found: id = {}", request.getMemberId());
+                throw new NotFoundException("Member not found: id = " + request.getMemberId() );
             }
 
             if(book.getQuantity() <= 0) {
-                throw new Exception("Book is out of stock");
+                log.error("Book is out of stock: id = {}", request.getBookId());
+                throw new BusinessException("Book is out of stock");
             }
 
             borrowingDAO.insert(conn, borrowing);
@@ -52,7 +59,7 @@ public class BorrowingServiceImpl implements BorrowingService {
             bookDAO.update(conn , request.getBookId() , - 1);
 
             conn.commit();
-
+            log.info("Book borrowed successfully");
             return new BorrowingDTO(
                     borrowing.getId(),
                     book.getTitle(),
@@ -62,6 +69,7 @@ public class BorrowingServiceImpl implements BorrowingService {
                     null
             );
         } catch (Exception e) {
+            log.error("Error borrowing book: {}", e.getMessage(), e);
             if(conn != null) {
                 conn.rollback();
             }
@@ -74,20 +82,24 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     public BorrowingDTO returnBook(BorrowingRequest request) throws Exception {
+        log.info("Returning book: {}", request);
         Connection conn = null;
         try {
             conn = pool.getConnection();
 
             Borrowing borrowing = borrowingDAO.findById(conn , request.getBorrowingId());
             if(borrowing == null) {
-                throw new Exception("Borrowing not found");
+                log.error("Borrowing not found: id = {}", request.getBorrowingId());
+                throw new NotFoundException("Borrowing not found: id = " + request.getBorrowingId());
             }
             if(borrowing.getReturnDate() != null) {
-                throw new Exception("Book has already been returned");
+                log.error("Book has already been returned");
+                throw new BusinessException("Book has already been returned");
             }
             bookDAO.update(conn, borrowing.getBookId(), 1);
             borrowingDAO.returnBook(conn,request.getBorrowingId());
             conn.commit();
+            log.info("Book returned successfully");
             return new BorrowingDTO(
                     borrowing.getId(),
                     null,
@@ -97,6 +109,7 @@ public class BorrowingServiceImpl implements BorrowingService {
                     LocalDate.now()
             );
         } catch (Exception e) {
+            log.error("Error returning book: {}", e.getMessage(), e);
             if(conn != null) {
                 conn.rollback();
             }
@@ -109,13 +122,16 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     public List<BorrowingDTO> findAllBorrowings() throws Exception {
+        log.info("Finding all borrowings");
         Connection conn = null;
         try {
             conn = pool.getConnection();
             List<BorrowingDTO> borrowings = borrowingDAO.findAll(conn);
             conn.commit();
+            log.info("Found {} borrowings", borrowings.size());
             return borrowings;
         } catch (Exception e) {
+            log.error("Error finding borrowings: {}", e.getMessage(), e);
             if(conn != null) {
                 conn.rollback();
             }
@@ -127,6 +143,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         }
     }
     public List<BorrowingDTO> findAllBorrowingsByMemberId(int memberId) throws Exception {
+        log.info("Finding all borrowings by member id: {}", memberId);
         Connection conn = null;
         try {
             conn = pool.getConnection();
@@ -134,6 +151,7 @@ public class BorrowingServiceImpl implements BorrowingService {
             conn.commit();
             return borrowings;
         } catch (Exception e) {
+            log.error("Error finding borrowings: {}", e.getMessage(), e);
             if(conn != null) {
                 conn.rollback();
             }

@@ -1,5 +1,6 @@
 package org.example.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.dto.request.MemberRequest;
 import org.example.service.MemberService;
 import org.example.config.DBConnectionPool;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import java.sql.Connection;
 
+@Slf4j
 @Service
 public class MemberServiceImpl implements MemberService {
     private final MemberDAO memberDAO;
@@ -23,6 +25,7 @@ public class MemberServiceImpl implements MemberService {
     public MemberResponse addMember(MemberRequest request) throws Exception {
         Connection conn = null;
         Member member = new Member(request.getName(), request.getEmail(), request.getPhone());
+        log.info("Adding member: {}", member);
         try {
             conn = pool.getConnection();
             memberDAO.insert(conn,member);
@@ -34,6 +37,7 @@ public class MemberServiceImpl implements MemberService {
                     member.getPhone()
             );
         } catch (Exception e) {
+            log.error("Error adding member: {}", e.getMessage(), e);
             if(conn != null) {
                 conn.rollback();
             }
@@ -46,6 +50,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     public List<MemberResponse> findAllMembers() throws Exception {
+        log.info("Finding all members");
         Connection conn = null;
         try {
             conn = pool.getConnection();
@@ -53,6 +58,7 @@ public class MemberServiceImpl implements MemberService {
             conn.commit();
             return members;
         } catch (Exception e) {
+            log.error("Error finding members: {}", e.getMessage(), e);
             if(conn != null) {
                 conn.rollback();
             }
