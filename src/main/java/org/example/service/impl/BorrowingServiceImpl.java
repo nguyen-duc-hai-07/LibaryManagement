@@ -34,23 +34,23 @@ public class BorrowingServiceImpl implements BorrowingService {
 
     public BorrowingDTO borrowBook(BorrowingRequest request) throws Exception {
         Borrowing borrowing = new Borrowing(request.getMemberId(), request.getBookId());
-        log.info("Borrowing book: {}", borrowing);
+        log.debug("Borrowing book: {}", borrowing);
         Connection conn = null;
         try {
             conn = pool.getConnection();
             Book book = bookDAO.findById(conn , request.getBookId());
             if(book == null) {
-                log.error("Book not found: id = {}", request.getBookId());
+                log.warn("Book not found: id = {}", request.getBookId());
                 throw new NotFoundException("Book not found: id = " + request.getBookId());
             }
             Member member = memberDAO.findById(conn , request.getMemberId() );
             if(member == null) {
-                log.error("Member not found: id = {}", request.getMemberId());
+                log.warn("Member not found: id = {}", request.getMemberId());
                 throw new NotFoundException("Member not found: id = " + request.getMemberId() );
             }
 
             if(book.getQuantity() <= 0) {
-                log.error("Book is out of stock: id = {}", request.getBookId());
+                log.warn("Book is out of stock: id = {}", request.getBookId());
                 throw new BusinessException("Book is out of stock");
             }
 
@@ -82,18 +82,18 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     public BorrowingDTO returnBook(BorrowingRequest request) throws Exception {
-        log.info("Returning book: {}", request);
+        log.debug("Returning book: {}", request);
         Connection conn = null;
         try {
             conn = pool.getConnection();
 
             Borrowing borrowing = borrowingDAO.findById(conn , request.getBorrowingId());
             if(borrowing == null) {
-                log.error("Borrowing not found: id = {}", request.getBorrowingId());
+                log.warn("Borrowing not found: id = {}", request.getBorrowingId());
                 throw new NotFoundException("Borrowing not found: id = " + request.getBorrowingId());
             }
             if(borrowing.getReturnDate() != null) {
-                log.error("Book has already been returned");
+                log.warn("Book has already been returned");
                 throw new BusinessException("Book has already been returned");
             }
             bookDAO.update(conn, borrowing.getBookId(), 1);
@@ -122,7 +122,6 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     public List<BorrowingDTO> findAllBorrowings() throws Exception {
-        log.info("Finding all borrowings");
         Connection conn = null;
         try {
             conn = pool.getConnection();
@@ -143,12 +142,13 @@ public class BorrowingServiceImpl implements BorrowingService {
         }
     }
     public List<BorrowingDTO> findAllBorrowingsByMemberId(int memberId) throws Exception {
-        log.info("Finding all borrowings by member id: {}", memberId);
+        log.debug("Finding all borrowings by member id: {}", memberId);
         Connection conn = null;
         try {
             conn = pool.getConnection();
             List<BorrowingDTO> borrowings = borrowingDAO.findAllByMemberId(conn, memberId);
             conn.commit();
+            log.info("Found {} borrowings", borrowings.size());
             return borrowings;
         } catch (Exception e) {
             log.error("Error finding borrowings: {}", e.getMessage(), e);

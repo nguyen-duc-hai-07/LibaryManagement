@@ -2,11 +2,11 @@ package org.example.controller;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.constant.MessageResponse;
+import org.example.dto.response.ApiResponse;
 import org.example.dto.response.BookResponse;
 import org.example.dto.request.BookRequest;
 import org.example.service.BookService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,14 +21,14 @@ public class BookController {
     }
 
 @PostMapping
-     public BookResponse addBook(@RequestBody BookRequest request) throws Exception {
+     public ApiResponse<BookResponse> addBook(@RequestBody BookRequest request) throws Exception {
         log.info("Adding book: {}", request);
-        return bookService.addBook(request);
+        return new ApiResponse<>(MessageResponse.CREATE_BOOK_SUCCESS, bookService.addBook(request));
     }
 @GetMapping
-    public List<BookResponse> findAllBooks() throws Exception {
+    public ApiResponse<List<BookResponse>> findAllBooks() throws Exception {
         log.info("Finding all books");
-        return bookService.findAllBooks();
+        return new ApiResponse<>(MessageResponse.GET_ALL_BOOK_SUCCESS, bookService.findAllBooks());
     }
 }
 

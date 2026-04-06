@@ -25,7 +25,7 @@ public class MemberServiceImpl implements MemberService {
     public MemberResponse addMember(MemberRequest request) throws Exception {
         Connection conn = null;
         Member member = new Member(request.getName(), request.getEmail(), request.getPhone());
-        log.info("Adding member: {}", member);
+        log.debug("Adding member: {}", member);
         try {
             conn = pool.getConnection();
             memberDAO.insert(conn,member);
@@ -50,7 +50,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     public List<MemberResponse> findAllMembers() throws Exception {
-        log.info("Finding all members");
+        log.debug("Finding all members");
         Connection conn = null;
         try {
             conn = pool.getConnection();

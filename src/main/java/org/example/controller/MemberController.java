@@ -1,11 +1,11 @@
 package org.example.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.constant.MessageResponse;
 import org.example.dto.request.MemberRequest;
+import org.example.dto.response.ApiResponse;
 import org.example.dto.response.MemberResponse;
 import org.example.service.MemberService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,14 +20,14 @@ public class MemberController {
     }
 
     @PostMapping
-    public MemberResponse addMember(@RequestBody MemberRequest request) throws Exception {
+    public ApiResponse<MemberResponse> addMember(@RequestBody MemberRequest request) throws Exception {
         log.info("Adding member: {}", request);
-        return memberService.addMember(request);
+        return new ApiResponse<>(MessageResponse.CREATE_MEMBER_SUCCESS, memberService.addMember(request));
     }
 
     @GetMapping
-    public List<MemberResponse> findAllMembers() throws Exception {
+    public ApiResponse<List<MemberResponse>> findAllMembers() throws Exception {
         log.info("Finding all members");
-        return memberService.findAllMembers();
+        return new ApiResponse<>(MessageResponse.GET_ALL_MEMBER_SUCCESS, memberService.findAllMembers());
     }
 }

@@ -24,7 +24,7 @@ public class BookServiceImpl implements BookService {
     public BookResponse addBook(BookRequest request) throws Exception {
         Connection conn = null;
         Book book = new Book(request.getTitle(), request.getAuthor(), request.getQuantity());
-        log.info("Adding book: {}", book);
+        log.debug("Adding book: {}", book);
         try {
             conn = pool.getConnection();
 
@@ -52,7 +52,7 @@ public class BookServiceImpl implements BookService {
     }
 
     public List<BookResponse> findAllBooks() throws Exception {
-        log.info("Finding all books");
+        log.debug("Finding all books");
         Connection conn = null;
         try {
             conn = pool.getConnection();

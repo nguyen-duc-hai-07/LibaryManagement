@@ -15,16 +15,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNotFoundException(NotFoundException e) {
         log.warn("Not Found Exception: {}", e.getMessage());
-        return ResponseEntity.status(404).body(new ApiResponse<>(404, e.getMessage(), null));
+        return ResponseEntity.status(404).body(new ApiResponse<>(404, e.getMessage()));
     }
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
         log.error("Business Exception: {}", e.getMessage());
-        return ResponseEntity.status(400).body(new ApiResponse<>(400, e.getMessage(), null));
+        return ResponseEntity.status(400).body(new ApiResponse<>(400, e.getMessage()));
     }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
         log.error("Exception: {}", e.getMessage());
-        return ResponseEntity.status(500).body(new ApiResponse<>(500, "Internal Server Error", null));
+        return ResponseEntity.status(500).body(new ApiResponse<>(500, "Internal Server Error"));
     }
 }
